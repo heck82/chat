@@ -31,7 +31,7 @@ process.stdin.on("data", (data)=>{
 })
 
 client.on('data', (data)=>{
-	if(obj.name != ""){
+	if(obj.name){
 		console.log(data.toString())
 	}
 })
