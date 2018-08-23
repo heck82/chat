@@ -1,2 +1,0 @@
-# chat
-cli node chat
