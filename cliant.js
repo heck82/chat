@@ -1,19 +1,22 @@
 'use strict'
 let net = require('net')
-//let thr2 = require('through2')
+require('ansicolor').nice
+
 if(process.argv.length < 3){
-	console.error('please add port as argument')
-	process.exit('disconected')
+	console.error('please add port as argument'.bright.red)
+	process.exit()
 }
 
 let n = true
 let obj = {}
-//let name = ""
-//let msg = ""
+
+
 let client = net.connect(process.argv[2], (err)=>{
+	//	console.log('connected')
 	if (err) throw err	
 })
 
+console.log('**WELCOME to '+'CHANCK'.bright.magenta+'-Chat !!**')
 console.log('plase enter your name:')
 
 process.stdin.on("data", (data)=>{
@@ -37,7 +40,7 @@ client.on('data', (data)=>{
 })
 
 client.on('end', ()=>{
-	console.log("connection interrupted\nPlease reconnect")
+	console.log("connection interrupted".bgRed.white+"\nPlease reconnect".bgGreen.white)
 	process.exit()
 })
 

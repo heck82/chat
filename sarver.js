@@ -1,5 +1,6 @@
 'use strict'
 let net = require('net')
+require('ansicolor').nice
 let clients = []
 let server = net.createServer((socket)=>{
 	socket.id = socket.remoteAddress+":"+socket.remotePort
@@ -24,7 +25,7 @@ let server = net.createServer((socket)=>{
 		socket.destroy()
 		clients.splice(clients.indexOf(socket), 1)
 		clients.forEach((client)=>{
-			client.write(`${socket.name} has left a chat.`)
+			client.write(socket.name.green+" has left a chat.".bright.cyan)
 		})
 	})
 
@@ -48,10 +49,10 @@ let server = net.createServer((socket)=>{
 	function broadcast (obj, sender){
 		clients.forEach((client)=>{
 			if(!obj.msg){
-				client.write(`${obj.name} has join a chat`)
+				client.write(`${obj.name.green} has join a chat`.bright.cyan)
 				console.log(`${obj.name} has join a chat`)
-			}else{
-				client.write(`${obj.name} : ${obj.msg}`)
+			}else if(client != sender){
+				client.write(`${obj.name.green} : ${obj.msg.bright.green}`)
 				console.log(`${obj.name} : ${obj.msg}`)
 			}
 		})
