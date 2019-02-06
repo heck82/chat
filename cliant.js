@@ -10,32 +10,31 @@ if(process.argv.length < 3){
 let n = true
 let obj = {}
 let client = net.connect(process.argv[2], (err)=>{
-	//	console.log('connected')
 	if (err) throw err	
 })
-console.log('**  WELCOME to CHANCK-Chat !!  **'.bgGreen.bright.yellow)
-//console.log('plase enter your name:')
+console_out('**  WELCOME to CHANCK-Chat !!  **'.bgGreen.bright.yellow)
 rl.question('Please enter your nick: ', (name)=>{
 	obj.name = name
 	if (name){
 		client.write(JSON.stringify(obj))
 	}
-	rl.close()
+	rl.prompt(true)
 })
-//process.stdin.on("data", (data)=>{
-//	let txt = data.toString().trim()
-//	if(n == true && txt !=""|" "){
-//		obj.name = txt
-//		client.write(JSON.stringify(obj))
-//		n = false
-//	}else if(txt != ""|" "){
-//		obj.msg = txt
-//		client.write(JSON.stringify(obj))
-//	}
-//})
+rl.on('line', (line)=>{
+	obj.msg = line
+	client.write(JSON.stringify(obj))
+	rl.prompt(true)
+})
+function console_out(msg) {
+	process.stdout.clearLine();
+	process.stdout.cursorTo(0);
+	console.log(msg);
+	rl.prompt(true);
+}
+
 client.on('data', (data)=>{
 	if(obj.name){
-		console.log(data.toString())
+		console_out(data.toString())
 	}
 })
 client.on('end', ()=>{

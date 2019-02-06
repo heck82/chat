@@ -15,17 +15,21 @@ let server = net.createServer((socket)=>{
 	})
 	socket.on("data", (data)=>{
 		let obj = JSON.parse(data.toString().trim())
+		console.log(obj)
 		socket.name = obj.name
+		socket.msg = obj.msg
 		broadcast(obj, socket)
 	})
 	function broadcast (obj, sender){
+		if(!obj.msg)
+			console.log(`${obj.name} has join a chat`)
+		if(obj.msg)
+			console.log(`${obj.name} : ${obj.msg}`)
 		clients.forEach((client)=>{
 			if(!obj.msg){
 				client.write(`${obj.name.green} has join a chat`.bright.cyan)
-				console.log(`${obj.name} has join a chat`)
 			}else if(client != sender){
 				client.write(`${obj.name.green} : ${obj.msg.bright.green}`)
-				console.log(`${obj.name} : ${obj.msg}`)
 			}
 		})
 	}
@@ -36,7 +40,7 @@ process.stdin.on('data', (data)=>{
 		console.log(count.toString())	
 	}
 })
-server.listen(3000, (err)=>{
+server.listen(3000, '0.0.0.0', (err)=>{
 	if (err) throw err
 	console.log("server listening on port 3000")
 })
