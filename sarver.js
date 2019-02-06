@@ -6,12 +6,14 @@ let server = net.createServer((socket)=>{
 	socket.id = socket.remoteAddress+":"+socket.remotePort
 	clients.push(socket)
 	socket.on('end', ()=>{
-		console.log(`${socket.name} has been disconected`)
+		console.log(`${socket.name} : [${socket.id}] has been disconected`)
 		socket.destroy()
 		clients.splice(clients.indexOf(socket), 1)
-		clients.forEach((client)=>{
-			client.write(socket.name.green+" has left a chat.".bright.cyan)
-		})
+		if(socket.name){
+			clients.forEach((client)=>{
+				client.write(socket.name.green+" has left a chat.".bright.cyan)
+			})
+		}
 	})
 	socket.on("data", (data)=>{
 		let obj = JSON.parse(data.toString().trim())
@@ -22,25 +24,35 @@ let server = net.createServer((socket)=>{
 	})
 	function broadcast (obj, sender){
 		if(!obj.msg)
-			console.log(`${obj.name} has join a chat`)
+			console.log(`[${timeNow()}] ${obj.name} : [${socket.id}]  has join a chat`)
 		if(obj.msg)
-			console.log(`${obj.name} : ${obj.msg}`)
+			console.log(`[${timeNow()}] ${obj.name} : ${obj.msg}`)
 		clients.forEach((client)=>{
 			if(!obj.msg){
-				client.write(`${obj.name.green} has join a chat`.bright.cyan)
+				client.write(`[${timeNow()}] ${obj.name.green} has join a chat`.bright.cyan)
 			}else if(client != sender){
-				client.write(`${obj.name.green} : ${obj.msg.bright.green}`)
+				client.write(`[${timeNow()}] ${obj.name.green} : ${obj.msg.bright.green}`)
 			}
 		})
 	}
 })
+function timeNow(){
+	var d = new Date()
+	var m = d.getMinutes()
+	var h = d.getHours()
+	return h+":"+m
+}
 process.stdin.on('data', (data)=>{
 	let count = clients.length
 	if (data.toString().trim("\n") == "count"){
 		console.log(count.toString())	
 	}
 })
-server.listen(3000, '0.0.0.0', (err)=>{
+if(process.argv.length < 3){
+	console.error('please add port as argument'.bright.red)
+	process.exit()
+}
+server.listen(process.argv[2], '0.0.0.0', (err)=>{
 	if (err) throw err
-	console.log("server listening on port 3000")
+	console.log("server listening on port: "+process.argv[2].bright.green)
 })
