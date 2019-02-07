@@ -1,9 +1,11 @@
 'use strict'
 let net = require('net')
 require('ansicolor').nice
+let crypto = require('crypto')
 let clients = []
 let server = net.createServer((socket)=>{
 	socket.id = socket.remoteAddress+":"+socket.remotePort
+	socket.write("some text")
 	clients.push(socket)
 	socket.on('end', ()=>{
 		console.log(`${socket.name} : [${socket.id}] has been disconected`)
@@ -31,11 +33,18 @@ let server = net.createServer((socket)=>{
 			if(!obj.msg){
 				client.write(`[${timeNow()}] ${obj.name.green} has join a chat`.bright.cyan)
 			}else if(client != sender){
+				obj.msg = decrypt(obj.msg)
 				client.write(`[${timeNow()}] ${obj.name.green} : ${obj.msg.bright.green}`)
 			}
 		})
 	}
 })
+function decrypt(text){
+	var decipher = crypto.createDecipher('aes-256-ctr','zhopa')
+	var dec = decipher.update(text,'hex','utf8')
+	dec += decipher.final('utf8')
+	return dec
+}
 function timeNow(){
 	var d = new Date()
 	var m = d.getMinutes()
