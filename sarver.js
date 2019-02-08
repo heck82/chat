@@ -5,6 +5,7 @@ let crypto = require('crypto')
 let clients = []
 let server = net.createServer((socket)=>{
 	socket.id = socket.remoteAddress+":"+socket.remotePort
+	//clients.push(socket)
 	socket.write("online".green+": "+`${clients.length}`.lightCyan+" ( "+listName().bright.yellow+" )")
 	socket.on('end', ()=>{
 		console.log(`${socket.name} : [${socket.id}] has been disconected`)
@@ -20,7 +21,8 @@ let server = net.createServer((socket)=>{
 		let obj = JSON.parse(data.toString().trim())
 		console.log(obj)
 		socket.name = obj.name
-		clients.push(socket)
+		if(!obj.msg)
+			clients.push(socket)
 		socket.msg = obj.msg
 		broadcast(obj, socket)
 	})
@@ -40,7 +42,8 @@ let server = net.createServer((socket)=>{
 			if(!obj.msg){
 				client.write(`[${timeNow()}] ${obj.name.green} has join a chat`.bright.cyan)
 			}else if(client != sender){
-				obj.msg = decrypt(obj.msg)
+				obj.msg = obj.msg
+				//obj.msg = decrypt(obj.msg)
 				client.write(`[${timeNow()}] ${obj.name.green} : ${obj.msg.bright.green}`)
 			}
 		})

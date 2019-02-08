@@ -5,13 +5,15 @@ let crypto = require('crypto')
 
 let rl = readline.createInterface(process.stdin, process.stdout)
 require('ansicolor').nice
-if(process.argv.length < 3){
-	console.error('please add port as argument'.bright.red)
-	process.exit()
-}
+//if(process.argv.length < 3){
+//	console.error('please add port as argument'.bright.red)
+//	process.exit()
+//}
+//let port = process.argv[2]
+let port = 3000
 let n = true
 let obj = {}
-let client = net.connect(process.argv[2], '10.98.33.101', ()=>{
+let client = net.connect(port, '10.98.33.101', ()=>{
 	console_out('**WELCOME to TROLOLO-CHAT**'.bgGreen.bright.yellow)
 	rl.question('Please enter your nick: ', (name)=>{
 		if (name.trim()){
@@ -26,8 +28,8 @@ let client = net.connect(process.argv[2], '10.98.33.101', ()=>{
 	})
 	rl.on('line', (line)=>{
 		if(line.trim()){
-			obj.msg = encrypt(line.trim())
-			//obj.msg = line.trim()
+			//obj.msg = encrypt(line.trim())
+			obj.msg = line.trim()
 			client.write(JSON.stringify(obj))
 		}
 		rl.prompt(true)
@@ -69,7 +71,8 @@ client.on('end', ()=>{
 	process.stdout.clearLine();
 	process.stdout.cursorTo(0);
 	console.log("connection interrupted".bgRed.white)
-	process.stdout.write("trying to reconnect ....Please wait 15 sec".bgGreen.white)
+	console.log("please relogin".bgRed.white)
+	/*	process.stdout.write("trying to reconnect ....Please wait 15 sec".bgGreen.white)
 	let interv = setInterval(()=>{
 		process.stdout.clearLine();
 		process.stdout.cursorTo(0);
@@ -80,10 +83,10 @@ client.on('end', ()=>{
 		clearInterval(interv)
 		process.stdout.clearLine();
 		process.stdout.cursorTo(0);
-		client.connect(process.argv[2], ()=>{
+		client.connect(port, ()=>{
 			console.log("connection esteblished".bgBlue.white)
 			rl.prompt(true)
 		})
 	},15000)
-	//process.exit()
+	*/	process.exit()
 })
