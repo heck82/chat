@@ -54,6 +54,8 @@ function encrypt(text){
 client.on('data', (data)=>{
 	if(obj.name){
 		console_out(data.toString())
+	}else{
+		console_out(data.toString())
 	}
 })
 client.on('error',(err)=>{

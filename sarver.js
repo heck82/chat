@@ -5,15 +5,14 @@ let crypto = require('crypto')
 let clients = []
 let server = net.createServer((socket)=>{
 	socket.id = socket.remoteAddress+":"+socket.remotePort
-	socket.write("some text")
-	clients.push(socket)
+	socket.write("online".green+": "+`${clients.length}`.lightCyan+" ( "+listName().bright.yellow+" )")
 	socket.on('end', ()=>{
 		console.log(`${socket.name} : [${socket.id}] has been disconected`)
 		socket.destroy()
 		clients.splice(clients.indexOf(socket), 1)
 		if(socket.name){
 			clients.forEach((client)=>{
-				client.write(socket.name.green+" has left a chat.".bright.cyan)
+				client.write(`[${timeNow()}] ${socket.name.green} has left a chat`.bright.cyan)
 			})
 		}
 	})
@@ -21,9 +20,17 @@ let server = net.createServer((socket)=>{
 		let obj = JSON.parse(data.toString().trim())
 		console.log(obj)
 		socket.name = obj.name
+		clients.push(socket)
 		socket.msg = obj.msg
 		broadcast(obj, socket)
 	})
+	function listName (){
+		let list = []
+		clients.forEach((client)=>{
+			list.push(client.name)
+		})
+		return list.join(" , ")
+	}
 	function broadcast (obj, sender){
 		if(!obj.msg)
 			console.log(`[${timeNow()}] ${obj.name} : [${socket.id}]  has join a chat`)
