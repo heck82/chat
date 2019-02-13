@@ -5,12 +5,12 @@ let crypto = require('crypto')
 
 let rl = readline.createInterface(process.stdin, process.stdout)
 require('ansicolor').nice
-//if(process.argv.length < 3){
-//	console.error('please add port as argument'.bright.red)
-//	process.exit()
-//}
-//let port = process.argv[2]
-let port = 3000
+if(process.argv.length < 3){
+	console.error('please add port as argument'.bright.red)
+	process.exit()
+}
+let port = process.argv[2]
+//let port = 3000
 let n = true
 let obj = {}
 let client = net.connect(port, '10.98.33.101', ()=>{
@@ -19,6 +19,7 @@ let client = net.connect(port, '10.98.33.101', ()=>{
 		if (name.trim()){
 			//obj.name = encrypt(name.trim())
 			obj.name = name.trim()
+			obj.type = "join"
 			client.write(JSON.stringify(obj))
 			rl.prompt(true)
 		}else{
@@ -28,8 +29,10 @@ let client = net.connect(port, '10.98.33.101', ()=>{
 	})
 	rl.on('line', (line)=>{
 		if(line.trim()){
-			//obj.msg = encrypt(line.trim())
-			obj.msg = line.trim()
+			obj.msg = encrypt(line.trim())
+			//obj.msg = decrypt(obj.msg)
+			//obj.msg = line.trim()
+			obj.type = "msg"
 			client.write(JSON.stringify(obj))
 		}
 		rl.prompt(true)
@@ -47,15 +50,28 @@ function encrypt(text){
 	crypted += cipher.final('hex')
 	return crypted
 }
-/*function decrypt(text){
+function decrypt(text){
 	var decipher = crypto.createDecipher('aes-256-ctr','zhopa')
 	var dec = decipher.update(text,'hex','utf8')
 	dec += decipher.final('utf8')
 	return dec
-}*/
+}
 client.on('data', (data)=>{
 	if(obj.name){
-		console_out(data.toString())
+		let res = JSON.parse(data.toString().trim())
+		if(res.msg)
+			res.msg = decrypt(res.msg)
+		switch(res.type){
+			case "join":
+				console_out(`[${res.time}] ${res.name.green} has joined to chat`.lightCyan)
+				break
+			case "msg":
+				console_out(`[${res.time}] ${res.name} : ${res.msg.bright.green}`.green)
+				break
+			case "left":
+				console_out(`[${res.time}] ${res.name.green} has left a chat`.cyan)
+				break
+		}
 	}else{
 		console_out(data.toString())
 	}

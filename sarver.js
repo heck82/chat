@@ -3,9 +3,12 @@ let net = require('net')
 require('ansicolor').nice
 let crypto = require('crypto')
 let clients = []
-let server = net.createServer((socket)=>{
+let server = net.createServer()
+server.on('connection',function(socket){
 	socket.id = socket.remoteAddress+":"+socket.remotePort
+	console.log(`${socket.id} is connected`)
 	//clients.push(socket)
+	let obj = {}
 	socket.write("online".green+": "+`${clients.length}`.lightCyan+" ( "+listName().bright.yellow+" )")
 	socket.on('end', ()=>{
 		console.log(`${socket.name} : [${socket.id}] has been disconected`)
@@ -13,14 +16,17 @@ let server = net.createServer((socket)=>{
 		clients.splice(clients.indexOf(socket), 1)
 		if(socket.name){
 			clients.forEach((client)=>{
-				client.write(`[${timeNow()}] ${socket.name.green} has left a chat`.bright.cyan)
+				obj.type = "left"
+				client.write(JSON.stringify(obj))
+				//client.write(`[${timeNow()}] ${socket.name.green} has left a chat`.bright.cyan)
 			})
 		}
 	})
 	socket.on("data", (data)=>{
-		let obj = JSON.parse(data.toString().trim())
+		obj = JSON.parse(data.toString().trim())
 		console.log(obj)
 		socket.name = obj.name
+		obj.time = timeNow()
 		if(!obj.msg)
 			clients.push(socket)
 		socket.msg = obj.msg
@@ -39,27 +45,29 @@ let server = net.createServer((socket)=>{
 		if(obj.msg)
 			console.log(`[${timeNow()}] ${obj.name} : ${obj.msg}`)
 		clients.forEach((client)=>{
-			if(!obj.msg){
-				client.write(`[${timeNow()}] ${obj.name.green} has join a chat`.bright.cyan)
-			}else if(client != sender){
-				obj.msg = obj.msg
+			/*if(!obj.msg){
+				client.write(JSON.stringify(obj))
+			//client.write(`[${timeNow()}] ${obj.name.green} has join a chat`.bright.cyan)
+			}else*/ if(client != sender){
+				//obj.msg = obj.msg
+				client.write(JSON.stringify(obj))
 				//obj.msg = decrypt(obj.msg)
-				client.write(`[${timeNow()}] ${obj.name.green} : ${obj.msg.bright.green}`)
+				//client.write(`[${timeNow()}] ${obj.name.green} : ${obj.msg.bright.green}`)
 			}
 		})
 	}
 })
 function decrypt(text){
-	var decipher = crypto.createDecipher('aes-256-ctr','zhopa')
-	var dec = decipher.update(text,'hex','utf8')
+	let decipher = crypto.createDecipher('aes-256-ctr','zhopa')
+	let dec = decipher.update(text,'hex','utf8')
 	dec += decipher.final('utf8')
 	return dec
 }
 function timeNow(){
-	var d = new Date()
-	var m = d.getMinutes()
-	var h = d.getHours()
-	return h+":"+m
+	let d = new Date()
+	let m = d.getMinutes()
+	let h = d.getHours()
+	return h+":"+ (m.toString().length<2 ? "0"+m : m)
 }
 process.stdin.on('data', (data)=>{
 	let count = clients.length
