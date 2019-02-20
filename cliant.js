@@ -17,7 +17,6 @@ let client = net.connect(port, '10.98.33.101', ()=>{
 	console_out('**WELCOME to TROLOLO-CHAT**'.bgGreen.bright.yellow)
 	rl.question('Please enter your nick: ', (name)=>{
 		if (name.trim()){
-			//obj.name = encrypt(name.trim())
 			obj.name = name.trim()
 			obj.type = "join"
 			client.write(JSON.stringify(obj))
@@ -30,8 +29,6 @@ let client = net.connect(port, '10.98.33.101', ()=>{
 	rl.on('line', (line)=>{
 		if(line.trim()){
 			obj.msg = encrypt(line.trim())
-			//obj.msg = decrypt(obj.msg)
-			//obj.msg = line.trim()
 			obj.type = "msg"
 			client.write(JSON.stringify(obj))
 		}
@@ -44,14 +41,16 @@ function console_out(msg) {
 	console.log(msg)
 	rl.prompt(true)
 }
+let cph = 'aes192'
+let pass = 'zhopa'
 function encrypt(text){
-	var cipher = crypto.createCipher('aes-256-ctr','zhopa')
+	var cipher = crypto.createCipher(cph, pass)
 	var crypted = cipher.update(text,'utf8','hex')
 	crypted += cipher.final('hex')
 	return crypted
 }
 function decrypt(text){
-	var decipher = crypto.createDecipher('aes-256-ctr','zhopa')
+	var decipher = crypto.createDecipher(cph, pass)
 	var dec = decipher.update(text,'hex','utf8')
 	dec += decipher.final('utf8')
 	return dec

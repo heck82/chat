@@ -6,24 +6,31 @@ let clients = []
 let server = net.createServer()
 server.on('connection',function(socket){
 	socket.id = socket.remoteAddress+":"+socket.remotePort
-	console.log(`${socket.id} is connected`)
-	//clients.push(socket)
+	console.log(`[${timeNow()}] ${socket.id} is connected`)
 	let obj = {}
 	socket.write("online".green+": "+`${clients.length}`.lightCyan+" ( "+listName().bright.yellow+" )")
 	socket.on('end', ()=>{
-		console.log(`${socket.name} : [${socket.id}] has been disconected`)
-		socket.destroy()
-		clients.splice(clients.indexOf(socket), 1)
 		if(socket.name){
+			clients.splice(clients.indexOf(socket), 1)
 			clients.forEach((client)=>{
 				obj.type = "left"
 				client.write(JSON.stringify(obj))
-				//client.write(`[${timeNow()}] ${socket.name.green} has left a chat`.bright.cyan)
 			})
 		}
+		console.log(`${socket.name} : [${socket.id}] has been disconected`)
+		socket.destroy()
 	})
 	socket.on("data", (data)=>{
-		obj = JSON.parse(data.toString().trim())
+		try{
+			obj = JSON.parse(data.toString().trim())
+		}catch(err){
+			if(err){
+				socket.write(`go away\n`)
+				console.log(`[${timeNow()}] ${socket.id} connection denied`)
+				socket.destroy()
+				return
+			}
+		}
 		console.log(obj)
 		socket.name = obj.name
 		obj.time = timeNow()
@@ -45,14 +52,8 @@ server.on('connection',function(socket){
 		if(obj.msg)
 			console.log(`[${timeNow()}] ${obj.name} : ${obj.msg}`)
 		clients.forEach((client)=>{
-			/*if(!obj.msg){
+			if(client != sender){
 				client.write(JSON.stringify(obj))
-			//client.write(`[${timeNow()}] ${obj.name.green} has join a chat`.bright.cyan)
-			}else*/ if(client != sender){
-				//obj.msg = obj.msg
-				client.write(JSON.stringify(obj))
-				//obj.msg = decrypt(obj.msg)
-				//client.write(`[${timeNow()}] ${obj.name.green} : ${obj.msg.bright.green}`)
 			}
 		})
 	}
